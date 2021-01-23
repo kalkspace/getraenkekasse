@@ -1,8 +1,13 @@
 <template>
   <el-row :gutter="20">
     <el-col :span="18">
-      <el-row :gutter="20">
-        <el-col :span="8" :key="key" v-for="(product, key) in products">
+      <el-row :gutter="20" class="product-container">
+        <el-col
+          :span="8"
+          :key="key"
+          class="product-card"
+          v-for="(product, key) in products"
+        >
           <el-card>
             <img :src="product.image" class="image" />
             <div style="padding: 14px">
@@ -108,6 +113,14 @@ el-card {
 
 table {
   width: 100%;
+}
+
+.product-container {
+  margin-top: -10px;
+}
+
+.product-card {
+  padding: 10px 0;
 }
 .right {
   text-align: right;
