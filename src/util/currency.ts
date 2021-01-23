@@ -1,6 +1,6 @@
-export default function currency(value: number): string {
+export default function currency(value: BigInt): string {
   return new Intl.NumberFormat("de-DE", {
     style: "currency",
     currency: "EUR",
-  }).format(value);
+  }).format(Number(value) / 100);
 }

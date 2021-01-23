@@ -5,15 +5,15 @@
         <el-col
           :span="8"
           :key="key"
+          v-for="(drink, key) in drinks"
           class="product-card"
-          v-for="(product, key) in products"
         >
-          <el-card>
-            <img :src="product.image" class="image" />
+          <el-card @click="addDrink(drink)">
+            <img :src="'/mete/' + drink.logo_url" class="image" />
             <div style="padding: 14px">
               <el-row>
-                <el-col>{{ product.name }}</el-col>
-                <el-col><Price :value="product.price" /></el-col>
+                <el-col>{{ drink.name }}</el-col>
+                <el-col><Price :cents="drink.price_cents" /></el-col>
               </el-row>
             </div>
           </el-card>
@@ -31,15 +31,16 @@
       >
         <el-table-column prop="count" label="Anzahl">
           <template #default="scope">
-            <button>-</button><span>{{ scope.row.count }}</span
-            ><button>+</button></template
+            <el-button @click="removeDrink(scope.row)">-</el-button
+            ><span>{{ scope.row.count }}</span
+            ><el-button @click="scope.row.count++">+</el-button></template
           ></el-table-column
         >
         <el-table-column prop="name" label="Name"> </el-table-column>
         <el-table-column prop="price" label="Preis"
           ><template #default="scope">
             <!-- For some reason without the "|| 0" vue will yield a warning -->
-            <Price :value="scope.row.price || 0"
+            <Price :cents="scope.row.price || BigInt(0)"
           /></template>
         </el-table-column>
       </el-table>
@@ -48,59 +49,77 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, h } from "vue";
+import { defineComponent, ref } from "vue";
+
 import currency from "../util/currency";
 import Price from "./Price.vue";
 
-export default defineComponent({
+interface MeteDrink {
+  name: string;
+  id: string;
+  price: string;
+}
+
+interface Drink extends MeteDrink {
+  price_cents: BigInt;
+}
+
+interface CashierData {
+  drinks: Drink[];
+  cart: CartDrink[];
+}
+
+interface CartDrink {
+  name: string;
+  id: string;
+  price: BigInt;
+  count: number;
+}
+
+export default defineComponent<{}, {}, CashierData>({
   name: "Cashier",
   components: { Price },
+  async mounted() {
+    const response = await fetch("/mete/api/v1/drinks.json");
+    const meteDrinks: MeteDrink[] = await response.json();
+    this.drinks = meteDrinks.map((drink) => ({
+      ...drink,
+      price_cents: BigInt(parseFloat(drink.price) * 100),
+    }));
+  },
   methods: {
+    removeDrink(cartDrink: CartDrink) {
+      if (cartDrink.count > 1) {
+        cartDrink.count--;
+      } else {
+        const existingCartDrink = this.cart.findIndex(
+          (existingCartDrink) => existingCartDrink.id === cartDrink.id
+        );
+        this.cart.splice(existingCartDrink, 1);
+      }
+    },
+    addDrink({ name, id, price_cents: price }: Drink) {
+      const existing = this.cart.find((existing) => existing.id === id);
+      if (existing) {
+        existing.count++;
+      } else {
+        this.cart.push({ name, id, count: 1, price });
+      }
+    },
     getTotal(param: any) {
       const { data } = param;
       const sums: string[] = ["Gesamt"];
 
-      const prices = data.map((item) => item["price"]);
-      const sum = prices.reduce((prev, price) => prev + price, 0);
+      const prices = data.map((item) => item["price"] * BigInt(item["count"]));
+      const sum = prices.reduce((prev, price) => prev + price, 0n);
       sums.push(currency(sum));
       return sums;
     },
   },
   data: () => {
     return {
-      cart: [
-        { name: "Kaffee", price: 0.5, count: 1 },
-        { name: "Bier", price: 0.5, count: 2 },
-      ],
-      products: [
-        {
-          name: "Kaffee",
-          image: "https://netzfrauen.org/wp-content/uploads/2014/02/Kaffee.jpg",
-          price: 0.5,
-        },
-        {
-          name: "Bier",
-          image:
-            "https://images.alko.fi/images/cs_srgb,f_auto,t_medium/cdn/781456/sunner-kolsch.jpg",
-          price: 0.5,
-        },
-        {
-          name: "Kaffee",
-          image: "https://netzfrauen.org/wp-content/uploads/2014/02/Kaffee.jpg",
-          price: 0.5,
-        },
-        {
-          name: "Kaffee",
-          image: "https://netzfrauen.org/wp-content/uploads/2014/02/Kaffee.jpg",
-          price: 0.5,
-        },
-        {
-          name: "Kaffee",
-          image: "https://netzfrauen.org/wp-content/uploads/2014/02/Kaffee.jpg",
-          price: 0.5,
-        },
-      ],
-      test: 1,
+      drinks: [],
+      cart: [],
     };
   },
 });

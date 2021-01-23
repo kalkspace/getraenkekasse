@@ -1,0 +1,25 @@
+version: "3"
+
+volumes:
+  system:
+  database:
+
+services:
+  db:
+    image: postgres:10-alpine
+    environment:
+      POSTGRES_PASSWORD: mete
+    volumes:
+      - database:/var/lib/postgresql/data
+
+  backend:
+    environment:
+      RAILS_ENV: production
+    image: chaosdorf/mete
+    volumes:
+      - system:/app/public/system
+    restart: on-failure
+    depends_on:
+      - db
+    ports:
+      - "8080:80"

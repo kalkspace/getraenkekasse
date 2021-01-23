@@ -8,10 +8,10 @@ import currency from "../util/currency";
 
 export default defineComponent({
   name: "Price",
-  props: { value: { type: Number, required: true } },
+  props: { cents: { type: BigInt, required: true } },
   computed: {
     eur(): string {
-      return currency(this.value);
+      return currency(this.cents);
     },
   },
 });
