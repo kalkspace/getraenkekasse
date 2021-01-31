@@ -49,7 +49,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent } from "vue";
 
 import currency from "../util/currency";
 import Price from "./Price.vue";
@@ -61,7 +61,7 @@ interface MeteDrink {
 }
 
 interface Drink extends MeteDrink {
-  price_cents: BigInt;
+  price_cents: bigint;
 }
 
 interface CashierData {
@@ -72,8 +72,12 @@ interface CashierData {
 interface CartDrink {
   name: string;
   id: string;
-  price: BigInt;
+  price: bigint;
   count: number;
+}
+
+interface SummaryData {
+  data: CartDrink[];
 }
 
 export default defineComponent<{}, {}, CashierData>({
@@ -106,7 +110,7 @@ export default defineComponent<{}, {}, CashierData>({
         this.cart.push({ name, id, count: 1, price });
       }
     },
-    getTotal(param: any) {
+    getTotal(param: SummaryData) {
       const { data } = param;
       const sums: string[] = ["Gesamt"];
 
