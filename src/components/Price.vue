@@ -3,12 +3,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, PropType } from "vue";
 import currency from "../util/currency";
 
 export default defineComponent({
   name: "Price",
-  props: { cents: { type: BigInt, required: true } },
+  props: { cents: { type: Object as PropType<bigint>, required: true } },
   computed: {
     eur(): string {
       return currency(this.cents);

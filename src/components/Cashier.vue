@@ -13,7 +13,7 @@
             <div style="padding: 14px">
               <el-row>
                 <el-col>{{ drink.name }}</el-col>
-                <el-col><Price :cents="drink.price_cents" /></el-col>
+                <el-col><Price :cents="20n" /></el-col>
               </el-row>
             </div>
           </el-card>
@@ -40,10 +40,11 @@
         <el-table-column prop="price" label="Preis"
           ><template #default="scope">
             <!-- For some reason without the "|| 0" vue will yield a warning -->
-            <Price :cents="scope.row.price || BigInt(0)"
+            <Price :cents="scope.row.price || 0n"
           /></template>
         </el-table-column>
       </el-table>
+      <Checkout :disabled="cart.length == 0" @checkout="checkout" />
     </el-col>
   </el-row>
 </template>
@@ -53,14 +54,12 @@ import { defineComponent } from "vue";
 
 import currency from "../util/currency";
 import Price from "./Price.vue";
+import Checkout from "./Checkout.vue";
 
-interface MeteDrink {
-  name: string;
-  id: string;
-  price: string;
-}
+import { Drink as MeteDrink, User, BarcodeRef } from "../mete";
 
 interface Drink extends MeteDrink {
+  barcode: string | undefined;
   price_cents: bigint;
 }
 
@@ -71,7 +70,7 @@ interface CashierData {
 
 interface CartDrink {
   name: string;
-  id: string;
+  id: number;
   price: bigint;
   count: number;
 }
@@ -80,14 +79,31 @@ interface SummaryData {
   data: CartDrink[];
 }
 
+const getDrinks = async () => {
+  const response = await fetch("/mete/api/v1/drinks.json");
+  const meteDrinks: MeteDrink[] = await response.json();
+  return meteDrinks;
+};
+
+const getBarcodeRefs = async () => {
+  const response = await fetch("/mete/api/v1/barcodes.json");
+  const barcodeRefs: BarcodeRef[] = await response.json();
+  return barcodeRefs;
+};
+
 export default defineComponent<{}, {}, CashierData>({
   name: "Cashier",
   components: { Price },
   async mounted() {
-    const response = await fetch("/mete/api/v1/drinks.json");
-    const meteDrinks: MeteDrink[] = await response.json();
-    this.drinks = meteDrinks.map((drink) => ({
+    const [drinks, barcodeRefs]: [
+      MeteDrink[],
+      BarcodeRef[]
+    ] = await Promise.all([getDrinks(), getBarcodeRefs()]);
+
+    this.drinks = drinks.map((drink) => ({
       ...drink,
+      barcode: barcodeRefs.find((barcodeRef) => barcodeRef.drink == drink.id)
+        ?.id,
       price_cents: BigInt(parseFloat(drink.price) * 100),
     }));
   },
@@ -118,6 +134,20 @@ export default defineComponent<{}, {}, CashierData>({
       const sum = prices.reduce((prev, price) => prev + price, 0n);
       sums.push(currency(sum));
       return sums;
+    },
+    addFromBarcode(barcode: string) {
+      const drink = this.drinks.find((drink) => drink.barcode === barcode);
+      if (drink !== undefined) {
+        this.addDrink(drink);
+      }
+    },
+    async checkoutAsUser(user: User) {
+      this.$notify({
+        title: "Success",
+        message: `${user.name} checked out successfully`,
+        type: "success",
+      });
+      this.cart = [];
     },
   },
   data: () => {

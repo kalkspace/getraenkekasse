@@ -2,19 +2,19 @@
   <el-container>
     <el-header>Getränkekasse</el-header>
     <el-main>
-      <Cashier />
+      <SseContainer />
     </el-main>
   </el-container>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import Cashier from "./components/Cashier.vue";
+import SseContainer from "./components/SseContainer.vue";
 
 export default defineComponent({
   name: "App",
   components: {
-    Cashier,
+    SseContainer,
   },
 });
 </script>
