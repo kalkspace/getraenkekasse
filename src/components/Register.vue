@@ -5,7 +5,7 @@
     </el-col>
     <el-col :span="6" class="summary">
       <Cart :items="cart" @removeDrink="removeDrink" />
-      <Checkout :disabled="cart.length == 0" @checkout="checkout" />
+      <Checkout :disabled="cart.length == 0" @checkout="() => {}" />
     </el-col>
   </el-row>
 </template>
@@ -13,8 +13,6 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 
-import currency from "../util/currency";
-import Price from "./Price.vue";
 import ProductList from "./ProductList.vue";
 import Checkout from "./Checkout.vue";
 import Cart from "./Cart.vue";
@@ -25,15 +23,6 @@ import { CartDrink } from "../types/register";
 interface Drink extends MeteDrink {
   barcode: string | undefined;
   price_cents: bigint;
-}
-
-interface RegisterData {
-  drinks: Drink[];
-  cart: CartDrink[];
-}
-
-interface SummaryData {
-  data: CartDrink[];
 }
 
 const getDrinks = async () => {
@@ -48,9 +37,11 @@ const getBarcodeRefs = async () => {
   return barcodeRefs;
 };
 
-export default defineComponent<{}, {}, RegisterData>({
+export default defineComponent({
   name: "Register",
-  components: { Cart, Checkout, Price, ProductList },
+  components: { Cart, Checkout, ProductList },
+
+  setup() {},
   async mounted() {
     const [drinks, barcodeRefs]: [
       MeteDrink[],
@@ -83,15 +74,7 @@ export default defineComponent<{}, {}, RegisterData>({
         this.cart.push({ name, id, count: 1, price });
       }
     },
-    getTotal(param: SummaryData) {
-      const { data } = param;
-      const sums: string[] = ["Gesamt"];
 
-      const prices = data.map((item) => item["price"] * BigInt(item["count"]));
-      const sum = prices.reduce((prev, price) => prev + price, 0n);
-      sums.push(currency(sum));
-      return sums;
-    },
     addFromBarcode(barcode: string) {
       const drink = this.drinks.find((drink) => drink.barcode === barcode);
       if (drink !== undefined) {
@@ -99,7 +82,8 @@ export default defineComponent<{}, {}, RegisterData>({
       }
     },
     async checkoutAsUser(user: User) {
-      this.$notify({
+      // unsure how to fix typing...$notify is installed globally by element-plus
+      (this as any).$notify({
         title: "Success",
         message: `${user.name} checked out successfully`,
         type: "success",
@@ -109,8 +93,8 @@ export default defineComponent<{}, {}, RegisterData>({
   },
   data: () => {
     return {
-      drinks: [],
-      cart: [],
+      drinks: [] as Drink[],
+      cart: [] as CartDrink[],
     };
   },
 });
