@@ -4,8 +4,12 @@
       <ProductList @addDrink="addDrink" :drinks="drinks" />
     </el-col>
     <el-col :span="6" class="summary">
-      <Cart :items="cart" @removeDrink="removeDrink" />
-      <Checkout :disabled="cart.length == 0" @checkout="() => {}" />
+      <el-row>
+        <Cart :items="cart" @removeDrink="removeDrink" />
+      </el-row>
+      <el-row>
+        <Checkout :disabled="cart.length == 0" @checkout="checkoutAsUser" />
+      </el-row>
     </el-col>
   </el-row>
 </template>
@@ -82,7 +86,7 @@ export default defineComponent({
         this.addDrink(drink);
       }
     },
-    async checkoutAsUser(user: User) {
+    async checkoutAsUser(userId: string | number) {
       // unsure how to fix typing...$notify is installed globally by element-plus
       const notify = (this as any).$notify as Function;
       // no idea how to install a general error handler yet
@@ -90,7 +94,7 @@ export default defineComponent({
         const transactions = this.cart.reduce((prev, drink) => {
           for (let i = 0; i < drink.count; i++) {
             prev.push(
-              fetch(`/mete/api/v1/users/${user.id}/buy.json?drink=${drink.id}`)
+              fetch(`/mete/api/v1/users/${userId}/buy.json?drink=${drink.id}`)
             );
           }
           return prev;
@@ -106,7 +110,7 @@ export default defineComponent({
           );
         }
         this.cart = [];
-        const userResponse = await fetch(`/mete/api/v1/users/${user.id}`);
+        const userResponse = await fetch(`/mete/api/v1/users/${userId}`);
         const updatedUser = await userResponse.json();
         notify({
           title: `Vielen Dank für deinen Einkauf ${updatedUser.name}!`,

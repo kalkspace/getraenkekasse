@@ -102,7 +102,7 @@ export default defineComponent({
       this.clearDialog();
       const nfcId = JSON.parse((event as any).data!);
       fetchMeteUser(nfcId)
-        .then((user: User) => register.checkoutAsUser(user))
+        .then((user: User) => register.checkoutAsUser(user.id))
         .catch((e) => {
           if (e instanceof UserNotFoundError) {
             this.unregisteredNfc = nfcId;
