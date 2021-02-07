@@ -1,27 +1,11 @@
 <template>
   <el-row :gutter="20">
     <el-col :span="18">
-      <el-row :gutter="20" class="product-container">
-        <el-col
-          :span="8"
-          :key="key"
-          v-for="(drink, key) in drinks"
-          class="product-card"
-        >
-          <el-card @click="addDrink(drink)">
-            <img :src="'/mete/' + drink.logo_url" class="image" />
-            <div style="padding: 14px">
-              <el-row>
-                <el-col>{{ drink.name }}</el-col>
-                <el-col><Price :cents="20n" /></el-col>
-              </el-row>
-            </div>
-          </el-card>
-        </el-col>
-      </el-row>
+      <ProductList @addDrink="addDrink" :drinks="drinks" />
     </el-col>
     <el-col :span="6" class="summary">
       <el-table
+        class="table"
         :data="cart"
         stripe
         border
@@ -54,6 +38,7 @@ import { defineComponent } from "vue";
 
 import currency from "../util/currency";
 import Price from "./Price.vue";
+import ProductList from "./ProductList.vue";
 import Checkout from "./Checkout.vue";
 
 import { Drink as MeteDrink, User, BarcodeRef } from "../mete";
@@ -93,7 +78,7 @@ const getBarcodeRefs = async () => {
 
 export default defineComponent<{}, {}, CashierData>({
   name: "Cashier",
-  components: { Price },
+  components: { Checkout, Price, ProductList },
   async mounted() {
     const [drinks, barcodeRefs]: [
       MeteDrink[],
@@ -106,6 +91,7 @@ export default defineComponent<{}, {}, CashierData>({
         ?.id,
       price_cents: BigInt(parseFloat(drink.price) * 100),
     }));
+    console.log(this.drinks);
   },
   methods: {
     removeDrink(cartDrink: CartDrink) {
@@ -160,45 +146,9 @@ export default defineComponent<{}, {}, CashierData>({
 </script>
 
 <style scoped>
-el-card {
-  padding: 20px;
-}
-
-table {
+.table {
   width: 100%;
-}
-
-.product-container {
-  margin-top: -10px;
-}
-
-.product-card {
-  padding: 10px 0;
-}
-.right {
-  text-align: right;
-}
-
-.time {
-  font-size: 13px;
-  color: #999;
-}
-
-.bottom {
-  margin-top: 13px;
-  line-height: 12px;
-}
-
-.button {
-  padding: 0;
-  float: right;
-}
-
-.image {
-  width: 100%;
-  display: block;
-  max-height: 100px;
-  object-fit: contain;
+  margin-top: 10px;
 }
 
 .clearfix:before,
