@@ -1,9 +1,9 @@
 <template>
   <el-row :gutter="20">
-    <el-col :span="18">
+    <el-col :span="16">
       <ProductList @addDrink="addDrink" :drinks="drinks" />
     </el-col>
-    <el-col :span="6" class="summary">
+    <el-col :span="8" class="summary">
       <el-row>
         <Cart :items="cart" @removeDrink="removeDrink" />
       </el-row>
