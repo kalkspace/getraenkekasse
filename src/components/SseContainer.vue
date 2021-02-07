@@ -4,10 +4,10 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import Cashier from "./Cashier.vue";
+import Cashier from "./Register.vue";
 // it seems firefox closes the connection very frequently...so reconnect automatically
 import ReconnectingEventSource from "reconnecting-eventsource";
-import { User } from "../mete";
+import { User } from "../types/mete";
 
 interface UserMapping {
   id: string;

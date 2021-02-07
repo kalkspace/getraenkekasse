@@ -1,16 +1,14 @@
-interface User {
+export interface User {
   id: number;
   name: string;
 }
-interface BarcodeRef {
+export interface BarcodeRef {
   id: string;
   drink: number;
 }
 
-interface Drink {
+export interface Drink {
   name: string;
   id: number;
   price: string;
 }
-
-export { User, BarcodeRef, Drink };

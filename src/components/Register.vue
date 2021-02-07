@@ -4,30 +4,7 @@
       <ProductList @addDrink="addDrink" :drinks="drinks" />
     </el-col>
     <el-col :span="6" class="summary">
-      <el-table
-        class="table"
-        :data="cart"
-        stripe
-        border
-        show-summary
-        :summary-method="getTotal"
-        style="width: 100%"
-      >
-        <el-table-column prop="count" label="Anzahl">
-          <template #default="scope">
-            <el-button @click="removeDrink(scope.row)">-</el-button
-            ><span>{{ scope.row.count }}</span
-            ><el-button @click="scope.row.count++">+</el-button></template
-          ></el-table-column
-        >
-        <el-table-column prop="name" label="Name"> </el-table-column>
-        <el-table-column prop="price" label="Preis"
-          ><template #default="scope">
-            <!-- For some reason without the "|| 0" vue will yield a warning -->
-            <Price :cents="scope.row.price || 0n"
-          /></template>
-        </el-table-column>
-      </el-table>
+      <Cart :items="cart" @removeDrink="removeDrink" />
       <Checkout :disabled="cart.length == 0" @checkout="checkout" />
     </el-col>
   </el-row>
@@ -40,24 +17,19 @@ import currency from "../util/currency";
 import Price from "./Price.vue";
 import ProductList from "./ProductList.vue";
 import Checkout from "./Checkout.vue";
+import Cart from "./Cart.vue";
 
-import { Drink as MeteDrink, User, BarcodeRef } from "../mete";
+import { Drink as MeteDrink, User, BarcodeRef } from "../types/mete";
+import { CartDrink } from "../types/register";
 
 interface Drink extends MeteDrink {
   barcode: string | undefined;
   price_cents: bigint;
 }
 
-interface CashierData {
+interface RegisterData {
   drinks: Drink[];
   cart: CartDrink[];
-}
-
-interface CartDrink {
-  name: string;
-  id: number;
-  price: bigint;
-  count: number;
 }
 
 interface SummaryData {
@@ -76,9 +48,9 @@ const getBarcodeRefs = async () => {
   return barcodeRefs;
 };
 
-export default defineComponent<{}, {}, CashierData>({
-  name: "Cashier",
-  components: { Checkout, Price, ProductList },
+export default defineComponent<{}, {}, RegisterData>({
+  name: "Register",
+  components: { Cart, Checkout, Price, ProductList },
   async mounted() {
     const [drinks, barcodeRefs]: [
       MeteDrink[],
@@ -91,7 +63,6 @@ export default defineComponent<{}, {}, CashierData>({
         ?.id,
       price_cents: BigInt(parseFloat(drink.price) * 100),
     }));
-    console.log(this.drinks);
   },
   methods: {
     removeDrink(cartDrink: CartDrink) {
