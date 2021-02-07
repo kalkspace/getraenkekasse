@@ -16,7 +16,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { Drink } from "../mete";
+import { Drink } from "../types/mete";
 import Price from "./Price.vue";
 
 export default defineComponent({

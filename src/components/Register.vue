@@ -19,6 +19,7 @@ import Cart from "./Cart.vue";
 
 import { Drink as MeteDrink, User, BarcodeRef } from "../types/mete";
 import { CartDrink } from "../types/register";
+import currency from "../util/currency";
 
 interface Drink extends MeteDrink {
   barcode: string | undefined;
@@ -83,12 +84,45 @@ export default defineComponent({
     },
     async checkoutAsUser(user: User) {
       // unsure how to fix typing...$notify is installed globally by element-plus
-      (this as any).$notify({
-        title: "Success",
-        message: `${user.name} checked out successfully`,
-        type: "success",
-      });
-      this.cart = [];
+      const notify = (this as any).$notify as Function;
+      // no idea how to install a general error handler yet
+      try {
+        const transactions = this.cart.reduce((prev, drink) => {
+          for (let i = 0; i < drink.count; i++) {
+            prev.push(
+              fetch(`/mete/api/v1/users/${user.id}/buy.json?drink=${drink.id}`)
+            );
+          }
+          return prev;
+        }, [] as Promise<Response>[]);
+
+        const responses = await Promise.all(transactions);
+        const errors = responses
+          .filter((response) => !response.ok)
+          .map((errorResponse) => errorResponse.statusText);
+        if (errors.length > 0) {
+          throw new Error(
+            `Errors while calling the backend: ${errors.join(", ")}`
+          );
+        }
+        this.cart = [];
+        const userResponse = await fetch(`/mete/api/v1/users/${user.id}`);
+        const updatedUser = await userResponse.json();
+        notify({
+          title: `Vielen Dank für deinen Einkauf ${updatedUser.name}!`,
+          message: `Dein neuer Kontostand: ${currency(
+            BigInt(parseFloat(updatedUser.balance) * 100)
+          )}`,
+          type: "success",
+        });
+      } catch (e) {
+        notify({
+          title: "Fehler!",
+          message: `${e.message}`,
+          type: "error",
+        });
+        return;
+      }
     },
   },
   data: () => {
