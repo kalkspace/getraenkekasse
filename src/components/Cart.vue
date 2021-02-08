@@ -18,7 +18,7 @@
         ></template
       ></el-table-column
     >
-    <el-table-column prop="name" label="Name"> </el-table-column>
+    <el-table-column prop="name" label="Name" />
     <el-table-column prop="price" label="Einzelpreis">
       <template #default="scope">
         <!-- For some reason without the "|| 0" vue will yield a warning -->
