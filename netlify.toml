@@ -6,6 +6,6 @@
 
 [[redirects]]
   from = "/mete"
-  to = "https://enigmatic-inlet-60833.herokuapp.com/"
+  to = "https://enigmatic-inlet-60833.herokuapp.com/:splat"
   status = 200
   force = true # COMMENT: ensure that we always redirect
