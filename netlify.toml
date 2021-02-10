@@ -5,7 +5,7 @@
   command = "yarn build"
 
 [[redirects]]
-  from = "/mete"
+  from = "/mete/*"
   to = "https://enigmatic-inlet-60833.herokuapp.com/:splat"
   status = 200
   force = true # COMMENT: ensure that we always redirect
