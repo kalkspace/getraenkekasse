@@ -96,7 +96,6 @@ export default defineComponent({
   mounted() {
     const notify = (this as any).$notify;
     const register = this.$refs.register as typeof Register;
-    const evtSource = new ReconnectingEventSource("/events");
 
     const handleNfc = (event: Event) => {
       this.clearDialog();
@@ -117,29 +116,38 @@ export default defineComponent({
         });
     };
 
-    evtSource.addEventListener("nfc-plain", handleNfc);
-    evtSource.addEventListener("nfc-uuid", handleNfc);
-    evtSource.addEventListener("nfc-missing-getraenkekarte", (event: Event) => {
-      console.log("missing getraenkekarte", JSON.parse((event as any).data!));
-      notify({
-        type: "warning",
-        title: "Fehlende Android App!",
-        message: "Bitte die KalkSpace App Getränkekarte installieren!",
-      });
-    });
+    if (import.meta.env["VITE_GERAETE_EVENTS"] === "1") {
+      const evtSource = new ReconnectingEventSource("/events");
+      evtSource.addEventListener("nfc-plain", handleNfc);
+      evtSource.addEventListener("nfc-uuid", handleNfc);
+      evtSource.addEventListener(
+        "nfc-missing-getraenkekarte",
+        (event: Event) => {
+          console.log(
+            "missing getraenkekarte",
+            JSON.parse((event as any).data!)
+          );
+          notify({
+            type: "warning",
+            title: "Fehlende Android App!",
+            message: "Bitte die KalkSpace App Getränkekarte installieren!",
+          });
+        }
+      );
 
-    evtSource.addEventListener("nfc-invalid", (event: Event) => {
-      console.log("invalid", JSON.parse((event as any).data!));
-      notify({
-        type: "warning",
-        title: "Konnte NFC nicht lesen",
-        message: "Bitte erneut probieren!",
+      evtSource.addEventListener("nfc-invalid", (event: Event) => {
+        console.log("invalid", JSON.parse((event as any).data!));
+        notify({
+          type: "warning",
+          title: "Konnte NFC nicht lesen",
+          message: "Bitte erneut probieren!",
+        });
       });
-    });
 
-    evtSource.addEventListener("barcode", (event: Event) => {
-      register.addFromBarcode(JSON.parse((event as any).data!));
-    });
+      evtSource.addEventListener("barcode", (event: Event) => {
+        register.addFromBarcode(JSON.parse((event as any).data!));
+      });
+    }
   },
   data() {
     return {
