@@ -1,0 +1,11 @@
+[build]
+  publish = "dist/"
+
+  # Default build command.
+  command = "yarn build"
+
+[[redirects]]
+  from = "/mete/*"
+  to = "https://enigmatic-inlet-60833.herokuapp.com/:splat"
+  status = 200
+  force = true # COMMENT: ensure that we always redirect
