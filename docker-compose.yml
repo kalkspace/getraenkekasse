@@ -15,6 +15,7 @@ services:
   backend:
     environment:
       RAILS_ENV: production
+      RAILS_RELATIVE_URL_ROOT: "/mete"
     image: chaosdorf/mete
     volumes:
       - system:/app/public/system

@@ -18,19 +18,20 @@
     <el-main v-if="!mete">
       <SseContainer />
     </el-main>
-    <!-- <base href="/mete" /> -->
-    <iframe class="meteframe" v-if="mete" src="/mete" />
+    <Mete v-if="mete" />
   </el-container>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import SseContainer from "./components/SseContainer.vue";
+import Mete from "./components/Mete.vue";
 
 export default defineComponent({
   name: "App",
   components: {
     SseContainer,
+    Mete,
   },
   data() {
     return {
