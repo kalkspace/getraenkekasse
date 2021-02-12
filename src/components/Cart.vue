@@ -72,3 +72,10 @@ export default defineComponent({
   margin-right: 5px;
 }
 </style>
+
+<style>
+.el-table__footer {
+  font-weight: bold;
+  text-transform: uppercase;
+}
+</style>
