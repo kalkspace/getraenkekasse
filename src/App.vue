@@ -12,7 +12,9 @@
         >
       </div>
       <div>
-        <el-link type="primary" @click="goMete($event)">Mete</el-link>
+        <el-link type="primary" @click="goMete($event)"
+          >Mete (Administrationsbereich)</el-link
+        >
       </div>
     </el-drawer>
     <el-main v-if="!mete">
