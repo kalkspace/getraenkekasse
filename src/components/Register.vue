@@ -91,24 +91,31 @@ export default defineComponent({
       const notify = (this as any).$notify as Function;
       // no idea how to install a general error handler yet
       try {
-        const transactions = this.cart.reduce((prev, drink) => {
-          for (let i = 0; i < drink.count; i++) {
-            prev.push(
-              fetch(`/mete/api/v1/users/${userId}/buy.json?drink=${drink.id}`)
-            );
-          }
-          return prev;
-        }, [] as Promise<Response>[]);
+        // https://github.com/chaosdorf/mete/issues/97
+        //
+        // const transactions = this.cart.reduce((prev, drink) => {
+        //   for (let i = 0; i < drink.count; i++) {
+        //     prev.push(
+        //       fetch(`/mete/api/v1/users/${userId}/buy.json?drink=${drink.id}`)
+        //     );
+        //   }
+        //   return prev;
+        // }, [] as Promise<Response>[]);
 
-        const responses = await Promise.all(transactions);
-        const errors = responses
-          .filter((response) => !response.ok)
-          .map((errorResponse) => errorResponse.statusText);
-        if (errors.length > 0) {
-          throw new Error(
-            `Errors while calling the backend: ${errors.join(", ")}`
-          );
+        // const responses = await Promise.all(transactions);
+
+        // serialize requests for now :S
+        for (const drink of this.cart) {
+          for (let i = 0; i < drink.count; i++) {
+            const response = await fetch(
+              `/mete/api/v1/users/${userId}/buy.json?drink=${drink.id}`
+            );
+            if (!response.ok) {
+              throw new Error(`Error calling backend: ${response.statusText}`);
+            }
+          }
         }
+
         this.cart = [];
         const userResponse = await fetch(`/mete/api/v1/users/${userId}`);
         const updatedUser = await userResponse.json();
