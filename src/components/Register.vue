@@ -81,9 +81,16 @@ export default defineComponent({
     },
 
     addFromBarcode(barcode: string) {
+      const notify = (this as any).$notify as Function;
       const drink = this.drinks.find((drink) => drink.barcode === barcode);
       if (drink !== undefined) {
         this.addDrink(drink);
+      } else {
+        notify({
+          title: "Unbekannter Barcode!",
+          message: `Bitte den Barcode ${barcode} im Administrationsbereich hinterlegen!`,
+          type: "warning",
+        });
       }
     },
     async checkoutAsUser(userId: string | number) {
