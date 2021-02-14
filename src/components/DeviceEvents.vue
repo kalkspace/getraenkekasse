@@ -23,7 +23,6 @@
       </span>
     </template>
   </el-dialog>
-  <Register ref="register" />
 </template>
 
 <script lang="ts">
@@ -32,7 +31,6 @@ import { defineComponent } from "vue";
 import ReconnectingEventSource from "reconnecting-eventsource";
 import { User } from "../types/mete";
 
-import Register from "./Register.vue";
 import UserList from "./UserList.vue";
 
 interface UserMapping {
@@ -62,8 +60,9 @@ const fetchMeteUser = async (nfcId: string) => {
 };
 
 export default defineComponent({
-  name: "SseContainer",
-  components: { Register, UserList },
+  name: "DeviceEvents",
+  components: { UserList },
+  emits: ["userId", "barcode"],
   methods: {
     clearDialog() {
       this.unregisteredNfc = null;
@@ -95,13 +94,12 @@ export default defineComponent({
   },
   mounted() {
     const notify = (this as any).$notify;
-    const register = this.$refs.register as typeof Register;
 
     const handleNfc = (event: Event) => {
       this.clearDialog();
       const nfcId = JSON.parse((event as any).data!);
       fetchMeteUser(nfcId)
-        .then((user: User) => register.checkoutAsUser(user.id))
+        .then((user: User) => this.$emit("userId", user.id))
         .catch((e) => {
           if (e instanceof UserNotFoundError) {
             this.unregisteredNfc = nfcId;
@@ -145,7 +143,7 @@ export default defineComponent({
       });
 
       evtSource.addEventListener("barcode", (event: Event) => {
-        register.addFromBarcode(JSON.parse((event as any).data!));
+        this.$emit("barcode", JSON.parse((event as any).data!));
       });
     }
   },

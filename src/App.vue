@@ -17,23 +17,26 @@
         >
       </div>
     </el-drawer>
+    <DeviceEvents @userId="onUserId($event)" @barcode="onBarcode($event)" />
     <el-main v-if="!mete">
-      <SseContainer />
+      <Register ref="register" />
     </el-main>
     <Mete v-if="mete" />
   </el-container>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import SseContainer from "./components/SseContainer.vue";
+import { defineComponent, nextTick } from "vue";
+import DeviceEvents from "./components/DeviceEvents.vue";
 import Mete from "./components/Mete.vue";
+import Register from "./components/Register.vue";
 
 export default defineComponent({
   name: "App",
   components: {
-    SseContainer,
+    DeviceEvents,
     Mete,
+    Register,
   },
   data() {
     return {
@@ -42,6 +45,22 @@ export default defineComponent({
     };
   },
   methods: {
+    async onUserId(userId: string) {
+      // in case someone left mete open => immediately redirect to kassenview
+      this.menu = false;
+      this.mete = false;
+      await nextTick();
+      const register = this.$refs.register as typeof Register;
+      register.checkoutAsUser(userId);
+    },
+    async onBarcode(barcode: string) {
+      // in case someone left mete open => immediately redirect to kassenview
+      this.menu = false;
+      this.mete = false;
+      await nextTick();
+      const register = this.$refs.register as typeof Register;
+      register.addFromBarcode(barcode);
+    },
     // "Routing"
     goMete($event: Event) {
       $event.preventDefault();
