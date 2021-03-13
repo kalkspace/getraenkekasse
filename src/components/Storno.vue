@@ -1,7 +1,7 @@
 <template>
   <div class="storno">
     <div class="text">STORNO</div>
-    <img src="images/kid.png" @animationend="$emit('finished')" />
+    <img v-bind:src="kidUrl" @animationend="$emit('finished')" />
   </div>
 </template>
 
@@ -92,9 +92,13 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import kidUrl from "../images/kid.png";
 
 export default defineComponent({
   name: "Storno",
   emits: ["finished"],
+  data() {
+    return { kidUrl };
+  },
 });
 </script>
