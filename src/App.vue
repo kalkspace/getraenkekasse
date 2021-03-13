@@ -1,4 +1,5 @@
 <template>
+  <Storno v-if="storno" @finished="stornoFinished()" />
   <el-container class="maincontainer">
     <el-header>
       <el-button @click="menu = true">Menü</el-button>
@@ -17,7 +18,11 @@
         >
       </div>
     </el-drawer>
-    <DeviceEvents @userId="onUserId($event)" @barcode="onBarcode($event)" />
+    <DeviceEvents
+      @userId="onUserId($event)"
+      @barcode="onBarcode($event)"
+      @storno="onStorno()"
+    />
     <el-main v-if="!mete">
       <Register ref="register" />
     </el-main>
@@ -30,6 +35,7 @@ import { defineComponent, nextTick } from "vue";
 import DeviceEvents from "./components/DeviceEvents.vue";
 import Mete from "./components/Mete.vue";
 import Register from "./components/Register.vue";
+import Storno from "./components/Storno.vue";
 
 export default defineComponent({
   name: "App",
@@ -37,14 +43,19 @@ export default defineComponent({
     DeviceEvents,
     Mete,
     Register,
+    Storno,
   },
   data() {
     return {
       menu: false,
       mete: false,
+      storno: false,
     };
   },
   methods: {
+    stornoFinished() {
+      this.storno = false;
+    },
     async onUserId(userId: string) {
       // in case someone left mete open => immediately redirect to kassenview
       this.menu = false;
@@ -60,6 +71,15 @@ export default defineComponent({
       await nextTick();
       const register = this.$refs.register as typeof Register;
       register.addFromBarcode(barcode);
+    },
+    async onStorno() {
+      // in case someone left mete open => immediately redirect to kassenview
+      this.menu = false;
+      this.mete = false;
+      this.storno = true;
+      await nextTick();
+      const register = this.$refs.register as typeof Register;
+      register.storno();
     },
     // "Routing"
     goMete($event: Event) {

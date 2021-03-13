@@ -62,7 +62,7 @@ const fetchMeteUser = async (nfcId: string) => {
 export default defineComponent({
   name: "DeviceEvents",
   components: { UserList },
-  emits: ["userId", "barcode"],
+  emits: ["userId", "barcode", "storno"],
   methods: {
     clearDialog() {
       this.unregisteredNfc = null;
@@ -144,6 +144,10 @@ export default defineComponent({
 
       evtSource.addEventListener("barcode", (event: Event) => {
         this.$emit("barcode", JSON.parse((event as any).data!));
+      });
+
+      evtSource.addEventListener("storno", (event: Event) => {
+        this.$emit("storno");
       });
     }
   },

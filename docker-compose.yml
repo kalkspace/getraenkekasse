@@ -16,7 +16,7 @@ services:
     environment:
       RAILS_ENV: production
       RAILS_RELATIVE_URL_ROOT: "/mete"
-    image: m0ppers/mete
+    image: chaosdorf/mete
     volumes:
       - system:/app/public/system
     depends_on:

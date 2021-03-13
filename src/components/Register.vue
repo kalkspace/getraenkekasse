@@ -25,6 +25,12 @@ import { Drink as MeteDrink, User, BarcodeRef } from "../types/mete";
 import { CartDrink } from "../types/register";
 import currency from "../util/currency";
 
+interface StornoInfo {
+  userId: string;
+  amount: BigInt;
+  stornoTimeout: number;
+}
+
 interface Drink extends MeteDrink {
   barcode: string | undefined;
   price_cents: bigint;
@@ -93,7 +99,38 @@ export default defineComponent({
         });
       }
     },
-    async checkoutAsUser(userId: string | number) {
+
+    async storno() {
+      const notify = (this as any).$notify as Function;
+      if (!this.stornoInfo) {
+        notify({
+          title: `Keine Stornoinformationen vorhanden! Zu spät?`,
+          type: "warning",
+        });
+        return;
+      }
+      clearTimeout(this.stornoInfo.stornoTimeout);
+      try {
+        await fetch(
+          `/mete/users/${this.stornoInfo.userId}/deposit?amount=${
+            Number(this.stornoInfo.amount) / 100
+          }`
+        );
+        notify({
+          title: `Storno erfolgreich`,
+          type: "success",
+        });
+        this.stornoInfo = null;
+      } catch (e) {
+        notify({
+          title: "Fehler!",
+          message: `${e.message}`,
+          type: "error",
+        });
+      }
+    },
+
+    async checkoutAsUser(userId: string) {
       // unsure how to fix typing...$notify is installed globally by element-plus
       const notify = (this as any).$notify as Function;
       // no idea how to install a general error handler yet
@@ -112,6 +149,7 @@ export default defineComponent({
         // const responses = await Promise.all(transactions);
 
         // serialize requests for now :S
+
         for (const drink of this.cart) {
           for (let i = 0; i < drink.count; i++) {
             const response = await fetch(
@@ -122,7 +160,23 @@ export default defineComponent({
             }
           }
         }
-
+        if (this.stornoInfo) {
+          clearTimeout(this.stornoInfo!.stornoTimeout);
+        }
+        this.stornoInfo = {
+          userId: userId,
+          amount: this.cart.reduce(
+            (prev, drink) => prev + drink.price * BigInt(drink.count),
+            0n
+          ),
+          stornoTimeout: setTimeout(() => {
+            notify({
+              title: `Stornozeit abgelaufen`,
+              type: "info",
+            });
+            this.stornoInfo = null;
+          }, 60000),
+        };
         this.cart = [];
         const userResponse = await fetch(`/mete/api/v1/users/${userId}`);
         const updatedUser = await userResponse.json();
@@ -139,7 +193,6 @@ export default defineComponent({
           message: `${e.message}`,
           type: "error",
         });
-        return;
       }
     },
   },
@@ -147,6 +200,7 @@ export default defineComponent({
     return {
       drinks: [] as Drink[],
       cart: [] as CartDrink[],
+      stornoInfo: null as StornoInfo | null,
     };
   },
 });
