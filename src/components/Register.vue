@@ -21,7 +21,7 @@ import ProductList from "./ProductList.vue";
 import Checkout from "./Checkout.vue";
 import Cart from "./Cart.vue";
 
-import { Drink as MeteDrink, User, BarcodeRef } from "../types/mete";
+import { Drink as MeteDrink, BarcodeRef } from "../types/mete";
 import { CartDrink } from "../types/register";
 import currency from "../util/currency";
 
@@ -32,7 +32,7 @@ interface StornoInfo {
 }
 
 interface Drink extends MeteDrink {
-  barcode: string | undefined;
+  barcodes: string[];
   price_cents: bigint;
 }
 
@@ -54,15 +54,14 @@ export default defineComponent({
 
   setup() {},
   async mounted() {
-    const [drinks, barcodeRefs]: [
-      MeteDrink[],
-      BarcodeRef[]
-    ] = await Promise.all([getDrinks(), getBarcodeRefs()]);
+    const [drinks, barcodeRefs]: [MeteDrink[], BarcodeRef[]] =
+      await Promise.all([getDrinks(), getBarcodeRefs()]);
 
     this.drinks = drinks.map((drink) => ({
       ...drink,
-      barcode: barcodeRefs.find((barcodeRef) => barcodeRef.drink == drink.id)
-        ?.id,
+      barcodes: barcodeRefs
+        .filter((barcodeRef) => barcodeRef.drink == drink.id)
+        .map((barcode) => barcode.id),
       price_cents: BigInt(parseFloat(drink.price) * 100),
     }));
   },
@@ -88,7 +87,9 @@ export default defineComponent({
 
     addFromBarcode(barcode: string) {
       const notify = (this as any).$notify as Function;
-      const drink = this.drinks.find((drink) => drink.barcode === barcode);
+      const drink = this.drinks.find((drink) =>
+        drink.barcodes.includes(barcode)
+      );
       if (drink !== undefined) {
         this.addDrink(drink);
       } else {
