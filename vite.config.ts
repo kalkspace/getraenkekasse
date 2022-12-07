@@ -15,6 +15,9 @@ export default defineConfig({
         target: "http://localhost:3003/",
         rewrite: (path) => path.replace(/^\/mete-compat/, ""),
       },
+      "^/mete/api/v1/users/\\d+/buy.json": {
+        target: "http://127.0.0.1:5000/",
+      },
       "/mete": {
         target: "http://localhost:8080/",
       },
