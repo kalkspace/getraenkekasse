@@ -16,7 +16,7 @@ services:
     environment:
       RAILS_ENV: production
       RAILS_RELATIVE_URL_ROOT: "/mete"
-    image: chaosdorf/mete
+    image: quay.io/kalkspace/mete
     volumes:
       - system:/app/public/system
     depends_on:

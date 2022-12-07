@@ -115,7 +115,12 @@ export default defineComponent({
         await fetch(
           `/mete/users/${this.stornoInfo.userId}/deposit?amount=${
             Number(this.stornoInfo.amount) / 100
-          }`
+          }`,
+          {
+            headers: {
+              "X-Storno": "1",
+            },
+          }
         );
         notify({
           title: `Storno erfolgreich`,
