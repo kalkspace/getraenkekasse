@@ -54,7 +54,9 @@ export default defineComponent({
       }
       const users = await response.json();
       this.users = users
-        .filter((user: User) => user.name.includes(query))
+        .filter((user: User) =>
+          user.name.toLowerCase().includes(query.toLowerCase())
+        )
         .map((user: User) => {
           return {
             value: user.id.toString(),
