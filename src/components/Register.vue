@@ -1,15 +1,17 @@
 <template>
-  <el-row :gutter="20">
+  <el-row :gutter="24">
     <el-col :span="14">
       <ProductList @addDrink="addDrink" :drinks="drinks" />
     </el-col>
-    <el-col :span="10" class="summary">
-      <el-row>
-        <Cart :items="cart" @removeDrink="removeDrink" />
-      </el-row>
-      <el-row>
-        <Checkout :disabled="cart.length == 0" @checkout="checkoutAsUser" />
-      </el-row>
+    <el-col :span="10">
+      <div class="summary">
+        <el-row>
+          <Cart :items="cart" @removeDrink="removeDrink" />
+        </el-row>
+        <el-row>
+          <Checkout :disabled="cart.length == 0" @checkout="checkoutAsUser" />
+        </el-row>
+      </div>
     </el-col>
   </el-row>
 </template>
@@ -216,6 +218,14 @@ export default defineComponent({
 .table {
   width: 100%;
   margin-top: 10px;
+}
+
+.summary {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
 }
 
 .clearfix:before,

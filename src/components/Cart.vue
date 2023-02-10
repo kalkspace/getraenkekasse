@@ -47,7 +47,7 @@ interface SummaryData {
 export default defineComponent({
   name: "Cart",
   components: { Price },
-  props: { items: { type: Object as PropType<CartDrink> } },
+  props: { items: { type: Object as PropType<CartDrink[]> } },
   emits: ["removeDrink"],
   methods: {
     getRowPrice({ price, count }: CartDrink) {
@@ -74,6 +74,10 @@ export default defineComponent({
 </style>
 
 <style>
+.el-table__header thead {
+  color: black;
+}
+
 .el-table__footer {
   font-weight: bold;
   text-transform: uppercase;
