@@ -74,6 +74,10 @@ export default defineComponent({
 </style>
 
 <style>
+.el-table__header thead {
+  color: black;
+}
+
 .el-table__footer {
   font-weight: bold;
   text-transform: uppercase;
