@@ -47,7 +47,7 @@ interface SummaryData {
 export default defineComponent({
   name: "Cart",
   components: { Price },
-  props: { items: { type: Object as PropType<CartDrink> } },
+  props: { items: { type: Object as PropType<CartDrink[]> } },
   emits: ["removeDrink"],
   methods: {
     getRowPrice({ price, count }: CartDrink) {
