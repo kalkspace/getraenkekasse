@@ -24,6 +24,7 @@
         <!-- For some reason without the "|| 0" vue will yield a warning -->
         <Price :cents="scope.row.price || 0n"
       /></template>
+      <template #header> Einzel&shy;preis </template>
     </el-table-column>
     <el-table-column prop="price" label="Preis"
       ><template #default="scope">
@@ -70,6 +71,11 @@ export default defineComponent({
 .btn {
   margin-left: 5px;
   margin-right: 5px;
+}
+
+.cell {
+  hyphens: manual;
+  word-break: normal;
 }
 </style>
 
