@@ -161,7 +161,7 @@ export default defineComponent({
         for (const drink of this.cart) {
           for (let i = 0; i < drink.count; i++) {
             const response = await fetch(
-              `/mete/api/v1/users/${userId}/buy.json?drink=${drink.id}`
+              `/mete-compat/api/v1/users/${userId}/buy.json?drink=${drink.id}`
             );
             if (!response.ok) {
               throw new Error(`Error calling backend: ${response.statusText}`);
