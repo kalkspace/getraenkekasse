@@ -16,7 +16,7 @@
         <el-button @click="clearDialog()">Abbrechen</el-button>
         <el-button
           type="primary"
-          @click="registerNfc(unregisteredNfc, selectedUser)"
+          @click="registerNfc(unregisteredNfc as string, selectedUser)"
           :disabled="selectedUser == ''"
           >NFC-Code registrieren</el-button
         >
@@ -146,7 +146,7 @@ export default defineComponent({
         this.$emit("barcode", JSON.parse((event as any).data!));
       });
 
-      evtSource.addEventListener("storno", (event: Event) => {
+      evtSource.addEventListener("storno", (_: Event) => {
         this.$emit("storno");
       });
     }
@@ -155,7 +155,7 @@ export default defineComponent({
     return {
       dialogVisible: false,
       selectedUser: "",
-      unregisteredNfc: null,
+      unregisteredNfc: null as null | string,
     };
   },
 });

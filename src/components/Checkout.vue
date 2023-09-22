@@ -35,6 +35,7 @@ import { defineComponent } from "vue";
 
 import UserList from "./UserList.vue";
 import MD5 from "crypto-js/md5";
+import { User } from "../types/mete";
 
 export default defineComponent({
   components: { UserList },
@@ -44,7 +45,7 @@ export default defineComponent({
       dialogVisible: false,
       form: { selectedUser: "" },
       loading: false,
-      users: [],
+      users: [] as User[],
       search: "",
     };
   },
@@ -66,7 +67,7 @@ export default defineComponent({
       }
       this.loading = false;
     },
-    checkout(userId: string) {
+    checkout(userId: number) {
       this.dialogVisible = false;
       this.$emit("checkout", userId);
     },

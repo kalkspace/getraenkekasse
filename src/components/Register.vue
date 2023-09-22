@@ -24,18 +24,13 @@ import Checkout from "./Checkout.vue";
 import Cart from "./Cart.vue";
 
 import { Drink as MeteDrink, BarcodeRef } from "../types/mete";
-import { CartDrink } from "../types/register";
+import { CartDrink, Drink } from "../types/register";
 import currency from "../util/currency";
 
 interface StornoInfo {
   userId: string;
   amount: BigInt;
   stornoTimeout: number;
-}
-
-interface Drink extends MeteDrink {
-  barcodes: string[];
-  price_cents: bigint;
 }
 
 const getDrinks = async () => {
@@ -132,7 +127,7 @@ export default defineComponent({
       } catch (e) {
         notify({
           title: "Fehler!",
-          message: `${e.message}`,
+          message: `${(e as Error).message}`,
           type: "error",
         });
       }
@@ -198,7 +193,7 @@ export default defineComponent({
       } catch (e) {
         notify({
           title: "Fehler!",
-          message: `${e.message}`,
+          message: `${(e as Error).message}`,
           type: "error",
         });
       }
