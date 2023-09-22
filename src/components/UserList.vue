@@ -24,13 +24,18 @@
 import { defineComponent } from "vue";
 import { User } from "../types/mete";
 
+interface UserSearchResult {
+  value: string;
+  label: string;
+}
+
 export default defineComponent({
   name: "UserList",
   props: { modelValue: { type: String } },
   emits: ["update:modelValue"],
   data() {
     return {
-      users: [],
+      users: [] as UserSearchResult[],
       loading: false,
       wurst: null,
     };
