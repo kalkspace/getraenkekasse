@@ -1,13 +1,13 @@
-FROM node:12 as builder
+FROM node:18 as builder
 
 WORKDIR /src
 
 ENV VITE_GERAETE_EVENTS=1
 
-COPY package.json yarn.lock /src/
-RUN yarn --frozen-lockfile
+COPY package.json package-lock.json /src/
+RUN npm ci
 COPY ./ /src
-RUN yarn build
+RUN npm run build
 
 FROM nginx:1.19
 
