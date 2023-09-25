@@ -7,7 +7,8 @@ ENV VITE_GERAETE_EVENTS=1
 COPY package.json package-lock.json /src/
 RUN npm ci
 COPY ./ /src
-RUN npm run build
+RUN ./node_modules/.bin/vue-tsc
+RUN ./node_modules/.bin/vite build
 
 FROM nginx:1.19
 
