@@ -14,3 +14,5 @@ export interface Drink {
   price: string;
   logo_url: string;
 }
+
+export interface Testi {}
