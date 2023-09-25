@@ -1,6 +1,6 @@
 <template>
   <el-row :gutter="20" class="container">
-    <el-col :span="8" :key="key" v-for="(drink, key) in drinks" class="col">
+    <el-col :span="6" :key="key" v-for="(drink, key) in drinks" class="col">
       <el-card class="card" @click="$emit('addDrink', drink)">
         <img :src="'/mete/' + drink.logo_url" class="image" />
         <div style="padding: 14px">
