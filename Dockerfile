@@ -1,4 +1,4 @@
-FROM node:18 as builder
+FROM --platform=linux/amd64 node:18 as builder
 
 WORKDIR /src
 
