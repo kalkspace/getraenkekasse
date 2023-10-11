@@ -1,12 +1,15 @@
 <template>
   <el-row :gutter="24">
     <el-col :span="14">
+      <TextDivider>Getränke</TextDivider>
       <ProductList @addDrink="addDrink" :drinks="drinks" />
+      <TextDivider>Guthaben aufladen</TextDivider>
+      <MoneyList @addMoney="addMoney" />
     </el-col>
     <el-col :span="10">
       <div class="summary">
         <el-row>
-          <Cart :items="cart" @removeDrink="removeDrink" />
+          <Cart :items="cart" @removeItem="removeItem" />
         </el-row>
         <el-row>
           <Checkout :disabled="cart.length == 0" @checkout="checkoutAsUser" />
@@ -22,10 +25,12 @@ import { defineComponent } from "vue";
 import ProductList from "./ProductList.vue";
 import Checkout from "./Checkout.vue";
 import Cart from "./Cart.vue";
+import TextDivider from "./TextDivider.vue";
 
 import { Drink as MeteDrink, BarcodeRef } from "../types/mete";
-import { CartDrink, Drink } from "../types/register";
+import { CartDrink, CartItem, Drink } from "../types/register";
 import currency from "../util/currency";
+import MoneyList from "./MoneyList.vue";
 
 interface StornoInfo {
   userId: string;
@@ -47,9 +52,8 @@ const getBarcodeRefs = async () => {
 
 export default defineComponent({
   name: "Register",
-  components: { Cart, Checkout, ProductList },
+  components: { Cart, Checkout, ProductList, TextDivider, MoneyList },
 
-  setup() {},
   async mounted() {
     const [drinks, barcodeRefs]: [MeteDrink[], BarcodeRef[]] =
       await Promise.all([getDrinks(), getBarcodeRefs()]);
@@ -63,22 +67,47 @@ export default defineComponent({
     }));
   },
   methods: {
-    removeDrink(cartDrink: CartDrink) {
-      if (cartDrink.count > 1) {
-        cartDrink.count--;
+    removeItem(cartItem: CartItem) {
+      if (cartItem.count > 1) {
+        cartItem.count--;
       } else {
-        const existingCartDrink = this.cart.findIndex(
-          (existingCartDrink) => existingCartDrink.id === cartDrink.id
-        );
-        this.cart.splice(existingCartDrink, 1);
+        const existingCartItem = this.cart.findIndex((existingCartItem) => {
+          if ("id" in cartItem) {
+            return (
+              "id" in existingCartItem &&
+              (existingCartItem as CartDrink).id === (cartItem as CartDrink).id
+            );
+          } else {
+            return existingCartItem.price == cartItem.price;
+          }
+        });
+        this.cart.splice(existingCartItem, 1);
       }
     },
     addDrink({ name, id, price_cents: price }: Drink) {
-      const existing = this.cart.find((existing) => existing.id === id);
+      const existing = this.cart.find(
+        (existing) => "id" in existing && existing.id! === id
+      );
       if (existing) {
         existing.count++;
       } else {
-        this.cart.push({ name, id, count: 1, price });
+        this.cart.push({ name, id, count: 1, price } as CartItem);
+      }
+    },
+
+    addMoney(price_cents: bigint) {
+      const deposit = -price_cents;
+      const existing = this.cart.find(
+        (existing) => !("id" in existing) && existing.price == deposit
+      );
+      if (existing) {
+        existing.count++;
+      } else {
+        this.cart.push({
+          name: `Guthaben ${price_cents / 100n} EUR`,
+          count: 1,
+          price: deposit,
+        });
       }
     },
 
@@ -138,6 +167,20 @@ export default defineComponent({
       const notify = (this as any).$notify as Function;
       // no idea how to install a general error handler yet
       try {
+        const deposit = -this.cart
+          .filter((item) => item.price < 0n)
+          .reduce((prev, item) => prev + item.price * BigInt(item.count), 0n);
+
+        if (deposit > 0n) {
+          const response = await fetch(
+            `/mete/users/${userId}/deposit?amount=${Number(deposit / 100n)}`
+          );
+          if (!response.ok) {
+            throw new Error(`Error calling backend: ${response.statusText}`);
+          }
+        }
+        const drinks = this.cart.filter((item) => "id" in item) as CartDrink[];
+
         // https://github.com/chaosdorf/mete/issues/97
         //
         // const transactions = this.cart.reduce((prev, drink) => {
@@ -152,8 +195,10 @@ export default defineComponent({
         // const responses = await Promise.all(transactions);
 
         // serialize requests for now :S
-
-        for (const drink of this.cart) {
+        for (const drink of drinks) {
+          if (drink.price < 0n) {
+            continue;
+          }
           for (let i = 0; i < drink.count; i++) {
             const response = await fetch(
               `/mete-compat/api/v1/users/${userId}/buy.json?drink=${drink.id}`
@@ -163,6 +208,7 @@ export default defineComponent({
             }
           }
         }
+
         if (this.stornoInfo) {
           clearTimeout(this.stornoInfo!.stornoTimeout);
         }
@@ -202,7 +248,7 @@ export default defineComponent({
   data: () => {
     return {
       drinks: [] as Drink[],
-      cart: [] as CartDrink[],
+      cart: [] as CartItem[],
       stornoInfo: null as StornoInfo | null,
     };
   },

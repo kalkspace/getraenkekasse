@@ -1,28 +1,42 @@
 <template>
-  <el-row :gutter="20" class="container">
-    <el-col :span="6" :key="key" v-for="(drink, key) in drinks" class="col">
-      <el-card class="card" @click="$emit('addDrink', drink)">
-        <img :src="'/mete/' + drink.logo_url" class="image" />
-        <div style="padding: 14px">
-          <el-row>
-            <el-col>{{ drink.name }}</el-col>
-            <el-col><Price :cents="drink.price_cents" /></el-col>
-          </el-row>
-        </div>
-      </el-card>
-    </el-col>
-  </el-row>
+  <ImagePriceCardList :items="drinksAsItems" @click="itemClicked" />
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 import { Drink } from "../types/register";
-import Price from "./Price.vue";
+import ImagePriceCardList, {
+  ImagePriceCardItem,
+} from "./ImagePriceCardList.vue";
+
+interface ProductImagePriceCardItem extends ImagePriceCardItem {
+  id: number;
+}
 
 export default defineComponent({
   name: "ProductList",
-  components: { Price },
+  components: { ImagePriceCardList },
   emits: ["addDrink"],
+  computed: {
+    drinksAsItems(): ImagePriceCardItem[] {
+      return this.$props.drinks.map((drink) => {
+        return {
+          id: drink.id,
+          name: drink.name,
+          imageUrl: `/mete/${drink.logo_url}`,
+          priceCents: drink.price_cents,
+        };
+      });
+    },
+  },
+  methods: {
+    itemClicked(item: ProductImagePriceCardItem) {
+      this.$emit(
+        "addDrink",
+        this.$props.drinks.find((drink) => drink.id == item.id)
+      );
+    },
+  },
   props: { drinks: { type: Object as PropType<Drink[]>, required: true } },
 });
 </script>

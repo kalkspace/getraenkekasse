@@ -10,7 +10,7 @@
   >
     <el-table-column prop="count" label="Anzahl">
       <template #default="scope">
-        <el-button class="btn" @click="$emit('removeDrink', scope.row)"
+        <el-button class="btn" @click="$emit('removeItem', scope.row)"
           >-</el-button
         ><span>{{ scope.row.count }}</span
         ><el-button class="btn" @click="scope.row.count++"
@@ -38,20 +38,20 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 import Price from "./Price.vue";
-import { CartDrink } from "../types/register";
+import { CartItem } from "../types/register";
 import currency from "../util/currency";
 
 interface SummaryData {
-  data: CartDrink[];
+  data: CartItem[];
 }
 
 export default defineComponent({
   name: "Cart",
   components: { Price },
-  props: { items: { type: Object as PropType<CartDrink[]> } },
-  emits: ["removeDrink"],
+  props: { items: { type: Object as PropType<CartItem[]> } },
+  emits: ["removeItem"],
   methods: {
-    getRowPrice({ price, count }: CartDrink) {
+    getRowPrice({ price, count }: CartItem) {
       return price * BigInt(count);
     },
     getTotal(param: SummaryData) {

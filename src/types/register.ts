@@ -1,10 +1,13 @@
 import { Drink as MeteDrink } from "./mete.ts";
 
-export interface CartDrink {
+export interface CartItem {
   name: string;
-  id: number;
   price: bigint;
   count: number;
+}
+
+export interface CartDrink extends CartItem {
+  id: number;
 }
 
 export interface Drink extends MeteDrink {
