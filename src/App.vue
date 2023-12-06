@@ -90,7 +90,7 @@ export default defineComponent({
       this.menu = false;
       this.mete = true;
     },
-    addNewBarCode($event: Event, barcode: str) {
+    addNewBarCode($event: Event, barcode: string) {
       $event.preventDefault();
 
       this.meteUrl = '/mete/barcodes/new?id=' + encodeURIComponent(barcode);
