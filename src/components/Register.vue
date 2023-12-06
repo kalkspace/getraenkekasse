@@ -123,7 +123,7 @@ export default defineComponent({
           title: "Unbekannter Barcode!",
           message: `Klicke hier um den Barcode ${barcode} im Administrationsbereich zu hinterlegen!`,
           type: "warning",
-          onClick:($event: Event) => { this.$root.addNewBarCode($event, barcode); }
+          onClick:($event: Event) => { (this.$root as any)?.addNewBarCode($event, barcode); }
         });
       }
     },
