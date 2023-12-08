@@ -26,7 +26,7 @@
     <el-main v-if="!mete">
       <Register ref="register" />
     </el-main>
-    <Mete v-if="mete" />
+    <Mete v-if="mete" :url='meteUrl' />
   </el-container>
 </template>
 
@@ -49,6 +49,7 @@ export default defineComponent({
     return {
       menu: false,
       mete: false,
+      meteUrl: '/mete',
       storno: false,
     };
   },
@@ -85,6 +86,14 @@ export default defineComponent({
     goMete($event: Event) {
       $event.preventDefault();
 
+      this.meteUrl = '/mete';
+      this.menu = false;
+      this.mete = true;
+    },
+    addNewBarCode($event: Event, barcode: string) {
+      $event.preventDefault();
+
+      this.meteUrl = '/mete/barcodes/new?id=' + encodeURIComponent(barcode);
       this.menu = false;
       this.mete = true;
     },

@@ -121,8 +121,9 @@ export default defineComponent({
       } else {
         notify({
           title: "Unbekannter Barcode!",
-          message: `Bitte den Barcode ${barcode} im Administrationsbereich hinterlegen!`,
+          message: `Klicke hier um den Barcode ${barcode} im Administrationsbereich zu hinterlegen!`,
           type: "warning",
+          onClick:($event: Event) => { (this.$root as any)?.addNewBarCode($event, barcode); }
         });
       }
     },
